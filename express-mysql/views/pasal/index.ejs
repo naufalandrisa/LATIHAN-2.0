@@ -124,8 +124,8 @@
                                             for(var t = 0; t< data.length; t++) {%>  
                                                 <tr class="tr">
                                                     <th scope="row" class="text-center"><%= (t+1) %></th>
-                                                    <td><%= data[t].namapasal%></td>
-                                                    <td><%= data[t].keteranganpasal%></td>
+                                                    <td><%= data[t].nama_pasal%></td>
+                                                    <td><%= data[t].keterangan_pasal%></td>
                                                     <td class="text-center">
                                                         <a href="/pasal/edit/<%=data[t].id%>" class="btn btn-sm btn-warning">EDIT</a>
                                                         <a onclick="return alert('Yakin data ini akan dihapus?')" href="/pasal/delete/<%=data[t].id%>" class="btn btn-sm btn-danger">HAPUS</a>

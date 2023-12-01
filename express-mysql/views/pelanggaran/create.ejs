@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/stylesheets/style.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body>
     <div class="container-fluid p-0 d-flex h-100">
@@ -94,30 +95,36 @@
                     <div class="col">
                         <div class="card border-0 shadow rounded bg-white">
                             <div class="card-body">
-                                <form action="" method="post">
+                                <form action="store" method="post">
                                     <div class="form-group">
                                         <div class="form-group">
                                             <label>Waktu</label>
                                             <input type="text" class="form-control" name="waktu" value="<%= waktu%>" disabled>
                                         </div>
                                         <label>Nama Santri</label>
-                                        <input type="text" class="form-control" name="nama" value="" placeholder="Cari nama santri">
+                                        <input type="text" class="form-control" name="nama" id="nama" placeholder="Cari nama santri" oninput="getSuggestions(this.value)" >
+                                        <input type="text" class="form-control" name="santri_id" id="santri_id" value="" hidden>
+                                    
+                                        <div id="suggestions-container"></div>
                                     </div>
                                     <div class="form-group">
                                         <label>Kelas</label>
-                                        <input type="text" class="form-control" name="kelas" value="" disabled>
+                                        <input type="text" class="form-control" name="kelas" id="kelas" value="" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Pasal</label>
-                                        <input type="text" class="form-control" name="pasal" value="" placeholder="Cari pasal pelanggaran">
+                                        <input type="text" class="form-control" name="pasal" id="pasal" value="" placeholder="Cari pasal pelanggaran" oninput="getSuggestionsPasal(this.value)">
+                                        <input type="text" class="form-control" name="pasal_id" id="pasal_id" value="" hidden>
+                                    
+                                        <div id="pasal-container"></div>
                                     </div>
                                     <div class="form-group">
                                         <label>Keterangan</label>
-                                        <input type="text" class="form-control" name="kelas" value="" disabled>
+                                        <input type="text" class="form-control" name="keterangan" id="keterangan" value="" readonly>
                                     </div>
                                     <div class="form-group">
                                         <label>Catatan</label>
-                                        <input type="text" class="form-control" name="kelas" value="" placeholder="Catatan tambahan">
+                                        <input type="text" class="form-control" name="catatan" value="" placeholder="Catatan tambahan">
                                     </div>
                                     <br>
                                     <button type="submit" class="btn btn-primary">UPDATE</button>
@@ -130,6 +137,68 @@
             </div>  
         </div>
     </div>
+    <script>
+        function getSuggestions(input) {
+           document.getElementById('suggestions-container').innerHTML = '';
+       
+           if (input.trim!=="") {
+               $.ajax({
+                   url: '/pelanggaran/search/nama?suggest=true&nama=' + input,
+                   method: 'GET',
+                   success: function (data) {
+                       console.log('Success:', data);
+                       var suggestionsContainer = document.getElementById('suggestions-container');
+                       data.forEach(function (item) {
+                           var suggestionDiv = document.createElement('div');
+                           var hiddenInput = document.createElement('input');
+                           suggestionDiv.innerHTML = '<span class="outlined-span">' + item.nama + '</span>';
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'santri_id'; 
+                           suggestionDiv.onclick = function () {
+                               document.getElementById('nama').value = item.nama;
+                               document.getElementById('kelas').value = item.kelas;
+                               document.getElementById('santri_id').value= item.id; 
+                               document.getElementById('suggestions-container').innerHTML = '';
+                           };
+                           suggestionsContainer.appendChild(suggestionDiv);
+                       });
+                   },
+                   error: function (error) {
+                       console.error('Error fetching suggestions:', error);
+                   }
+               });
+           }
+       }
+       
+       function getSuggestionsPasal(input) {
+           document.getElementById('pasal-container').innerHTML = '';
+       
+           if (input.trim!=="") {
+               $.ajax({
+                   url: '/pelanggaran/search/pasal?suggest=true&nama=' + input,
+                   method: 'GET',
+                   success: function (data) {
+                       console.log('Success:', data);
+                       var suggestionsContainer = document.getElementById('pasal-container');
+                       data.forEach(function (item) {
+                            var suggestionDiv = document.createElement('div');
+                           suggestionDiv.innerHTML = '<span class="outlined-span">' + item.nama + '</span>';
+                           suggestionDiv.onclick = function () {
+                               document.getElementById('pasal').value = item.nama;
+                               document.getElementById('keterangan').value = item.keterangan;
+                                document.getElementById('pasal_id').value= item.id; 
+                               document.getElementById('pasal-container').innerHTML = '';
+                           };
+                           suggestionsContainer.appendChild(suggestionDiv);
+                       });
+                   },
+                   error: function (error) {
+                       console.error('Error fetching suggestions:', error);
+                   }
+               });
+           }
+       }
+       </script>
 </body>
 </html>
 

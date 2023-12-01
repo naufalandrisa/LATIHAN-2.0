@@ -9,7 +9,6 @@ var connection = require('../library/database');
  * INDEX POSTS
  */
 router.get('/', function (req, res, next) {
-    
     if(req.session.loggedin === true){
         res.render('pelanggaran/index', {url:'http://localhost:3000/',username: req.session.username, 
         });
@@ -18,6 +17,26 @@ router.get('/', function (req, res, next) {
     {
         res.render('index');
     }
+});
+
+router.get('/search/date', function (req, res, next) {
+    var date1 = req.query.date1;
+    var date2 = req.query.date2;
+
+    var sql = "SELECT santri.nama AS nama, santri.kelas AS kelas, pasal.nama_pasal AS pasal, pasal.keterangan_pasal AS keterangan, catatan FROM pelanggaran JOIN santri ON pelanggaran.santri_id = santri.id JOIN pasal ON pelanggaran.pasal_id = pasal.id WHERE waktu BETWEEN '"+date1+"' AND '"+date2+"' ORDER BY santri_id";
+    connection.query(sql, function (error, result) {
+        if (error) console.log(error);
+        
+        var pelanggaran = result.map(function (item) {
+            return { 
+                nama: item.nama,
+                kelas : item.kelas,
+                pasal: item.pasal,
+                keterangan: item.keterangan,
+                catatan: item.catatan };
+        });
+        res.json(pelanggaran);
+    });
 });
 
 router.get('/create', function (req, res, next) {
@@ -29,6 +48,7 @@ router.get('/create', function (req, res, next) {
     var jam = date.getHours();
     var menit = date.getMinutes();
     var detik = date.getSeconds();
+    const sqlFormattedDate = new Date(date.getTime()).toISOString().slice(0, 19).replace('T', ' '); 
     switch(hari) {
     case 0: hari = "Minggu"; break;
     case 1: hari = "Senin"; break;
@@ -55,6 +75,9 @@ router.get('/create', function (req, res, next) {
     var tampilTanggal = hari + ", " + tanggal + " " + bulan + " " + tahun;
     var tampilWaktu = jam + ":" + menit + ":" + detik;
     if(req.session.loggedin === true){
+        req.session.timestamp = {
+            waktu : sqlFormattedDate,
+        }
         res.render('pelanggaran/create', {url:'http://localhost:3000/',username: req.session.username,
             waktu: tampilTanggal+" (Jam: "+tampilWaktu+")",
             nama: '',
@@ -69,6 +92,61 @@ router.get('/create', function (req, res, next) {
         res.render('index');
     }
 });
+
+
+router.post('/store', function (req, res, next) {
+    var requestBody = req.body
+    var santri = requestBody.santri_id
+    var pasal = requestBody.pasal_id
+    var catatan = requestBody.catatan
+    var waktu = req.session.timestamp.waktu
+
+    console.log(requestBody)
+
+    var sql = "INSERT INTO pelanggaran(santri_id,  pasal_id, catatan, waktu) VALUES ('"+santri+"', '"+pasal+"', '"+catatan+"', '"+waktu+"')"
+
+    connection.query(sql, function(err, result){
+        if (err) console.log(err);
+
+        req.flash(result)
+    })
+    res.redirect("/pelanggaran")
+});
+
+router.get('/search/nama', function (req, res, next) {
+        var nama = req.query.nama;
+
+        var sql = "SELECT * FROM santri WHERE nama LIKE '%" + nama + "%'";
+        connection.query(sql, function (error, result) {
+            if (error) console.log(error);
+            
+            var suggestions = result.map(function (item) {
+                return { 
+                    id: item.id,
+                    nama: item.nama,
+                    kelas: item.kelas };
+            });
+            res.json(suggestions);
+        });
+});
+
+router.get('/search/pasal', function (req, res, next) {
+    var nama = req.query.nama;
+
+    var sql = "SELECT * FROM pasal WHERE nama_pasal LIKE '%" + nama + "%'";
+    connection.query(sql, function (error, result) {
+        if (error) console.log(error);
+        
+        var suggestions = result.map(function (item) {
+            return { 
+                id: item.id,
+                nama: item.nama_pasal,
+                keterangan: item.keterangan_pasal };
+        });
+        res.json(suggestions);
+    });
+});
+
 
 
 

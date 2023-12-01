@@ -11,7 +11,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/stylesheets/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  </head>
 </head>
 <body>
     <div class="container-fluid p-0 d-flex h-100">
@@ -95,7 +99,26 @@
                         <a href="pelanggaran/create" class="btn btn-md btn-success mb-3">TAMBAH PELANGGAR</a>
                         <div class="card border-0 shadow rounded bg-white">
                             <div class="card-body">
-                                <p>Konten disini</p>
+                                <table class="table table-dark table-striped">
+                                    <div class="search">
+                                        <form action="">
+                                            <input type="search" name="date-calendar" placeholder="Cari disini..." id="date-calendar" >
+                                            <input type="submit" value="CARI1" onclick="getPelanggaran()">
+                                        </form>
+                                        <thead>
+                                            <tr>
+                                            <th scope="col"style="text-align: center">NO.</th>
+                                            <th scope="col"style="text-align: center">NAMA SANTRI</th>
+                                            <th scope="col"style="text-align: center">KELAS</th>
+                                            <th scope="col"style="text-align: center">PASAL</th>
+                                            <th scope="col"style="text-align: center">KETERANGAN</th>
+                                            <th scope="col"style="text-align: center">CATATAN</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pelanggaran-tbody">
+
+                                        </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -103,6 +126,47 @@
             </div>  
         </div>
     </div>
+    <script>
+        $(document).ready(function() {
+          $("#date-calendar").datepicker();
+        });
+
+        function getPelanggaran(){
+            event.preventDefault(); 
+            var dateString  = document.getElementById("date-calendar").value;
+            const [month, day, year] = dateString.split('/');
+            var dateObject= new Date(`${month}/${day}/${year} 00:00:00`);
+            const timestamp1 = dateObject.getTime();
+            const sqlFormattedDate1 = new Date(timestamp1).toISOString().slice(0, 19).replace('T', ' '); 
+            dateObject.setDate(dateObject.getDate()+1);
+            const timestamp2 = dateObject.getTime();
+            console.log(timestamp1)
+            console.log(timestamp2)
+
+            const sqlFormattedDate2 = new Date(timestamp2).toISOString().slice(0, 19).replace('T', ' '); 
+            $.ajax({
+                url: '/pelanggaran/search/date?date1='+sqlFormattedDate1+'&date2='+sqlFormattedDate2,
+                method: 'GET',
+                success: function(data){
+                       console.log('Success:', data);
+                       var prevName = ''
+                       var pelanggaranContainer = document.getElementById('pelanggaran-tbody');
+
+                       pelanggaranContainer.innerHTML = '';
+                       data.forEach(function (item, index) {
+                           var pelanggaranTableRow = document.createElement('tr');
+                           if (item.nama !== prevName) {
+                            pelanggaranTableRow.innerHTML = '<td style="text-align: center;">'+(index+1)+'</td> \n <td style="text-align: center;">'+item.nama+'</td> \n <td style="text-align: center;">'+item.kelas+'</td> \n <td style="text-align: center;">'+item.pasal+'</td> \n <td style="text-align: center;">'+item.keterangan+'</td> \n <td style="text-align: center;">'+item.catatan+'</td>';
+                           }else{
+                            pelanggaranTableRow.innerHTML = '<td style="text-align: center;"></td> \n <td style="text-align: center;"></td> \n <td style="text-align: center;"></td> \n <td style="text-align: center;">'+item.pasal+'</td> \n <td style="text-align: center;">'+item.keterangan+'</td> \n <td style="text-align: center;">'+item.catatan+'</td>';
+                           }
+                           pelanggaranContainer.appendChild(pelanggaranTableRow);
+                           prevName = item.nama
+                       });
+                   },
+            })
+        }
+      </script>
 </body>
 </html>
 

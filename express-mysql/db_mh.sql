@@ -87,8 +87,8 @@ INSERT INTO `guru` (`id`, `username`, `password`, `namalengkap`, `jabatan`, `map
 
 CREATE TABLE `pasal` (
   `id` int(11) NOT NULL,
-  `namapasal` varchar(255) NOT NULL,
-  `keteranganpasal` varchar(255) NOT NULL
+  `nama_pasal` varchar(255) NOT NULL,
+  `keterangan_pasal` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -99,23 +99,6 @@ INSERT INTO `pasal` (`id`, `namapasal`, `keteranganpasal`) VALUES
 (6, 'Celana isbal / melebihi mata kaki', 'khusus laki-laki');
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `pelanggaran`
---
-
-CREATE TABLE `pelanggaran` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(255) NOT NULL,
-  `kelas` varchar(255) NOT NULL,
-  `pasal` varchar(255) NOT NULL,
-  `keterangan` varchar(255) NOT NULL,
-  `catatan` varchar(255) NOT NULL,
-  `waktu` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- --------------------------------------------------------
-
 --
 -- Table structure for table `santri`
 --
@@ -135,6 +118,20 @@ CREATE TABLE `santri` (
 INSERT INTO `santri` (`id`, `nama`, `kelas`, `gender`, `nisn`) VALUES
 (25, 'Naufal Andrisa', '11', 'Laki-laki', 1190292),
 (26, 'Mesra', '10', 'Laki-laki', 11902921);
+
+--
+-- Table structure for table `pelanggaran`
+--
+
+CREATE TABLE `pelanggaran` (
+  `id` int(11) NOT NULL,
+  `santri_id` int(11) NOT NULL ,
+  `pasal_id` int(11) NOT NULL,
+  `catatan` varchar(255) NOT NULL,
+  `waktu` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
 
 --
 -- Indexes for dumped tables
@@ -202,8 +199,7 @@ ALTER TABLE `pasal`
 --
 -- AUTO_INCREMENT for table `pelanggaran`
 --
-ALTER TABLE `pelanggaran`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
 
 --
 -- AUTO_INCREMENT for table `santri`
@@ -211,6 +207,15 @@ ALTER TABLE `pelanggaran`
 ALTER TABLE `santri`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 COMMIT;
+
+ALTER TABLE `pelanggaran`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `pelanggaran`
+  ADD CONSTRAINT `fk_pelanggaran_santri` FOREIGN KEY (`santri_id`) REFERENCES `santri`(`id`);
+
+ALTER TABLE `pelanggaran`
+ ADD CONSTRAINT `fk_pelanggaran_pasal`FOREIGN KEY (`pasal_id`) REFERENCES `pasal`(`id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
