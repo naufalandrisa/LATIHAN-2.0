@@ -102,8 +102,7 @@
                                 <table class="table table-dark table-striped">
                                     <div class="search">
                                         <form action="">
-                                            <input type="search" name="date-calendar" placeholder="Cari disini..." id="date-calendar" >
-                                            <input type="submit" value="CARI1" onclick="getPelanggaran()">
+                                            <input type="search" name="date-calendar" placeholder="Cari disini..." id="date-calendar" onchange="getPelanggaran()">
                                         </form>
                                         <thead>
                                             <tr>
@@ -116,7 +115,29 @@
                                             </tr>
                                         </thead>
                                         <tbody id="pelanggaran-tbody">
-
+                                            <% if(data.length){
+                                                var prevName = ""
+                                                for(var i=0; i < data.length; i++){%>
+                                                    <tr class="tr">
+                                                        <% if (prevName == data[i].nama){ %>
+                                                            <td></td>
+                                                            <td></td>
+                                                            <td style="text-align: center;"><%= data[i].kelas%></td>
+                                                            <td style="text-align: center;"><%= data[i].pasal%></td>
+                                                            <td style="text-align: center;"><%= data[i].keterangan%></td>
+                                                            <td style="text-align: center;"><%= data[i].catatan%></td>
+                                                        <%} else { %>
+                                                            <td style="text-align: center;"><%= i+1 %></td>
+                                                            <td style="text-align: center;"><%=data[i].nama%></td>
+                                                            <td style="text-align: center;"><%= data[i].kelas%></td>
+                                                            <td style="text-align: center;"><%= data[i].pasal%></td>
+                                                            <td style="text-align: center;"><%= data[i].keterangan%></td>
+                                                            <td style="text-align: center;"><%= data[i].catatan%></td>
+                                                        <%}
+                                                        prevName = data[i].nama%>
+                                                    </tr>
+                                                    <%}
+                                            }%>
                                         </tbody>
                                 </table>
                             </div>
@@ -140,9 +161,7 @@
             const sqlFormattedDate1 = new Date(timestamp1).toISOString().slice(0, 19).replace('T', ' '); 
             dateObject.setDate(dateObject.getDate()+1);
             const timestamp2 = dateObject.getTime();
-            console.log(timestamp1)
-            console.log(timestamp2)
-
+            
             const sqlFormattedDate2 = new Date(timestamp2).toISOString().slice(0, 19).replace('T', ' '); 
             $.ajax({
                 url: '/pelanggaran/search/date?date1='+sqlFormattedDate1+'&date2='+sqlFormattedDate2,

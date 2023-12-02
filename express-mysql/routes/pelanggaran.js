@@ -10,8 +10,28 @@ var connection = require('../library/database');
  */
 router.get('/', function (req, res, next) {
     if(req.session.loggedin === true){
-        res.render('pelanggaran/index', {url:'http://localhost:3000/',username: req.session.username, 
-        });
+        var currentDate = new Date();
+        currentDate.setDate(currentDate.getDate()+1)
+        currentDate.setHours(0, 0, 0, 0);
+        date1 = currentDate.toISOString().split('T')[0];
+        currentDate.setDate(currentDate.getDate()+1)
+        date2 = currentDate.toISOString().split('T')[0];
+
+        console.log(date1)
+        console.log(date2)
+
+    
+        var sql = "SELECT santri.nama AS nama, santri.kelas AS kelas, pasal.nama_pasal AS pasal, pasal.keterangan_pasal AS keterangan, catatan FROM pelanggaran JOIN santri ON pelanggaran.santri_id = santri.id JOIN pasal ON pelanggaran.pasal_id = pasal.id WHERE waktu BETWEEN '"+date1+"' AND '"+date2+"' ORDER BY santri_id";
+        connection.query(sql, function(error, result){
+            if (error) console.log(error);
+
+            console.log(result)
+    
+            res.render('pelanggaran', {url:'http://localhost:3000/',data: result,
+            username: req.session.username 
+            });
+        })
+
     }
     else
     {
